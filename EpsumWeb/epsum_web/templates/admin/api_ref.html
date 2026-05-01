@@ -1,0 +1,50 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}API Reference — EpsumThings Admin{% endblock %}
+{% block page_title %}API Reference{% endblock %}
+{% block breadcrumb %}API Reference{% endblock %}
+
+{% block content %}
+<div style="max-width:800px">
+  <p style="font-size:.88rem;color:var(--text2);margin-bottom:28px">REST API endpoints for integrating your CMS with the EpsumThings website. Base URL: <code style="background:var(--card);padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:.8rem;color:var(--accent-light)">https://api.epsumthings.com/v1</code></p>
+
+  <div class="api-section" style="margin-bottom:32px">
+    <h3 style="font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">&#128196; Blog Endpoints</h3>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+      <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs</code>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">List all blogs</span>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+      <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs/:slug</code>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Get single blog</span>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--blue-glow);color:var(--blue)">POST</span>
+      <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs</code>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Create blog</span>
+    </div>
+  </div>
+
+  <div class="api-section" style="margin-bottom:32px">
+    <h3 style="font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">&#128202; Case Study Endpoints</h3>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+      <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/case-studies</code>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">List all</span>
+    </div>
+  </div>
+
+  <div class="api-section" style="margin-bottom:32px">
+    <h3 style="font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">&#128233; Communications Endpoints</h3>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+      <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--blue-glow);color:var(--blue)">POST</span>
+      <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/contact</code>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Submit contact form</span>
+    </div>
+  </div>
+
+  <p style="font-size:.78rem;color:var(--text3);margin-top:20px">Full API documentation with request/response schemas is available in the <code style="background:var(--card);padding:2px 6px;border-radius:3px;font-family:var(--mono);font-size:.72rem">api-server.js</code> file.</p>
+</div>
+{% endblock %}

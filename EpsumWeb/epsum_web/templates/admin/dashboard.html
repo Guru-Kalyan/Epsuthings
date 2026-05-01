@@ -1,0 +1,79 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Dashboard — EpsumThings Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">Published Blogs</div>
+    <div class="stat-value" id="statBlogs">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Case Studies</div>
+    <div class="stat-value" id="statCS">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Inbox Messages</div>
+    <div class="stat-value" id="statInbox">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Demo Requests</div>
+    <div class="stat-value" id="statDemos">0</div>
+  </div>
+</div>
+
+<h3 style="font-size:.95rem;font-weight:700;margin-bottom:14px">Recent Activity</h3>
+<div class="table-wrap">
+  <table class="data-table">
+    <thead><tr><th>Activity</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+    <tbody id="activityTableBody">
+      <!-- Loaded via API -->
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function fetchDashboardData() {
+  const token = localStorage.getItem('token');
+  
+  // Fetch Stats
+  const statsRes = await fetch('/api/dashboard-stats/', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const statsData = await statsRes.json();
+  if (statsData.status === 'success') {
+    document.getElementById('statBlogs').textContent = statsData.data.blogs;
+    document.getElementById('statCS').textContent = statsData.data.case_studies;
+    document.getElementById('statInbox').textContent = statsData.data.unread_inbox;
+    document.getElementById('statDemos').textContent = statsData.data.demo_requests;
+  }
+
+  // Fetch Activity
+  const activityRes = await fetch('/api/recent-activity/', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const activityData = await activityRes.json();
+  if (activityData.status === 'success') {
+    const tbody = document.getElementById('activityTableBody');
+    if (activityData.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color: var(--text3)">No recent activity</td></tr>';
+        return;
+    }
+    tbody.innerHTML = activityData.data.map(a => `
+      <tr>
+        <td class="td-title">${a.text}</td>
+        <td>${a.type}</td>
+        <td>${a.date}</td>
+        <td><span class="badge-status badge-${a.status.toLowerCase()}">${a.status}</span></td>
+      </tr>
+    `).join('');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', fetchDashboardData);
+</script>
+{% endblock %}

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>403 - Forbidden | Access Denied</title>
+    <!-- Google Fonts + modern reset -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at 10% 30%, #f7f0ea 0%, #ede7e1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            color: #1e1b1a;
+        }
+
+        /* main container – elegant warning theme, warm tones */
+        .error-container {
+            max-width: 750px;
+            width: 100%;
+            background: rgba(255, 252, 245, 0.98);
+            backdrop-filter: blur(0px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(239, 193, 151, 0.35);
+        }
+
+        .error-container:hover {
+            box-shadow: 0 30px 60px -14px rgba(0, 0, 0, 0.26);
+        }
+
+        /* Header gradient – amber/copper = forbidden vibe but stylish */
+        .error-graphic {
+            background: linear-gradient(125deg, #2c1a12 0%, #5e2e1c 100%);
+            padding: 2rem 2rem 1.2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .error-graphic::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35px;
+            background: linear-gradient(to top, rgba(255, 252, 245, 0.98), transparent);
+            pointer-events: none;
+        }
+
+        /* lock / forbidden symbol + big 403 */
+        .forbidden-symbol {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.2rem;
+        }
+
+        .big-403 {
+            font-size: 7rem;
+            font-weight: 800;
+            line-height: 1;
+            color: #ffddb0;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.03em;
+            font-family: 'Inter', monospace;
+        }
+
+        .shield-icon {
+            background: rgba(255, 215, 170, 0.2);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            padding: 0.2rem 1rem;
+            font-size: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 500;
+            color: #ffdfb3;
+        }
+
+        @media (min-width: 540px) {
+            .big-403 {
+                font-size: 9rem;
+            }
+
+            .shield-icon {
+                font-size: 2.2rem;
+            }
+        }
+
+        .error-sub {
+            font-size: 1.1rem;
+            font-weight: 500;
+            background: rgba(255, 220, 180, 0.2);
+            display: inline-block;
+            padding: 0.25rem 1.2rem;
+            border-radius: 60px;
+            color: #fff0df;
+            margin-top: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* content area */
+        .error-content {
+            padding: 2.5rem 2rem 3rem 2rem;
+            text-align: center;
+        }
+
+        .error-title {
+            font-size: 1.9rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(135deg, #5e2e1c, #a45131);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .error-message {
+            font-size: 1rem;
+            color: #3b2c24;
+            max-width: 480px;
+            margin: 0 auto 1.2rem auto;
+            line-height: 1.55;
+        }
+
+        .error-help {
+            font-size: 0.9rem;
+            color: #6f4e37;
+            background: #f5ede4;
+            padding: 0.7rem 1.3rem;
+            border-radius: 60px;
+            display: inline-block;
+            margin: 0.8rem 0 1.5rem 0;
+            font-weight: 500;
+            border: 1px solid #eedbcb;
+        }
+
+        /* action buttons specific */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1.8rem;
+            border-radius: 2.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: 0.2s ease;
+            font-family: inherit;
+            cursor: pointer;
+            background: #ffffff;
+            color: #2c1a12;
+            border: 1px solid #e2cfbf;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .btn-primary {
+            background: #5e2e1c;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(94, 46, 28, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: #7c3f28;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(94, 46, 28, 0.3);
+        }
+
+        .btn-outline {
+            border: 1px solid #d6c0ae;
+            background: white;
+        }
+
+        .btn-outline:hover {
+            background: #fff7f0;
+            border-color: #b48b6f;
+            transform: translateY(-2px);
+        }
+
+        /* django integration note */
+        .django-note {
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #a68a74;
+            border-top: 1px solid #efe2d6;
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .django-note span {
+            font-family: monospace;
+            background: #f7efea;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        /* extra floating particles (subtle) */
+        .error-graphic {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pattern-dots {
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            background-image: radial-gradient(rgba(255, 200, 150, 0.2) 1.8px, transparent 1.8px);
+            background-size: 28px 28px;
+            bottom: -30px;
+            right: -30px;
+            pointer-events: none;
+            transform: rotate(10deg);
+        }
+
+        @media (max-width: 480px) {
+            .error-content {
+                padding: 1.8rem 1.2rem 2rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1.3rem;
+                font-size: 0.85rem;
+            }
+
+            .error-title {
+                font-size: 1.6rem;
+            }
+
+            .big-403 {
+                font-size: 6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="error-container">
+        <div class="error-graphic">
+            <div class="pattern-dots"></div>
+            <div class="forbidden-symbol">
+                <div class="big-403">403</div>
+            </div>
+            <div class="shield-icon">
+                🔒 ⛔ 🚫
+            </div>
+            <div class="error-sub">ACCESS FORBIDDEN</div>
+        </div>
+        <div class="error-content">
+            <h1 class="error-title">You shall not pass — unauthorized</h1>
+            <p class="error-message">
+                You don’t have permission to access this resource. The server understood the request, but refuses to
+                authorize it.
+            </p>
+            <div class="error-help">
+                🛡️ Possible reasons: missing credentials, insufficient privileges, or restricted area.
+            </div>
+            <div class="action-buttons">
+                <a href="/" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12L12 3l9 9" />
+                        <path d="M5 10v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+                        <path d="M12 16v-4" />
+                    </svg>
+                    Return to Homepage
+                </a>
+                <a href="/login/" class="btn btn-outline" id="loginSuggestionBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                        <polyline points="10 17 15 12 10 7" />
+                        <line x1="15" y1="12" x2="3" y2="12" />
+                    </svg>
+                    Try Log in / Sign in
+                </a>
+            </div>
+            <div class="django-note">
+                <span>⚙️ DJANGO 403 HANDLER: 403.html</span>
+                <span>🧩 PermissionDenied exception ready</span>
+                <span>🔐 Use @permission_required or custom middleware</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // Retrieve requested URL to give context & potential redirect after auth
+            const forbiddenPath = window.location.pathname;
+            const fullUrl = window.location.href;
+
+            // display subtle console info for dev/debug (django friendly)
+            console.warn(`[Django 403 Forbidden] Access denied for path: "${forbiddenPath}" | full: ${fullUrl}`);
+
+            // Enhance "Try Log in" button — if django login URL exists (default /login/ or /accounts/login/)
+            // we can keep default href as "/login/" but also optionally add 'next' param to redirect back after login.
+            const loginBtn = document.getElementById('loginSuggestionBtn');
+            if (loginBtn) {
+                // Instead of just static "/login/", we can build a smarter next parameter.
+                // This preserves the originally denied page, so after successful login -> redirect back.
+                // Django's login view typically honors 'next' parameter.
+                const currentPath = window.location.pathname + window.location.search;
+                let loginUrl = '/login/';
+                if (currentPath && currentPath !== '/') {
+                    loginUrl = `/login/?next=${encodeURIComponent(currentPath)}`;
+                }
+                loginBtn.setAttribute('href', loginUrl);
+
+                // optional: if you use admin or custom login url, you can override (but remains flexible)
+                // Additional fallback: if dev uses allauth or custom, they can edit href manually, but this is friendly.
+            }
+
+            // Provide extra helper for "report this forbidden event" feature
+            // Usually for 403, you may not want to log automatically, but we add a small report ability via Alt+click or hidden? 
+            // Instead we can add a help tooltip – but not necessary. I'll provide an optional copy info function on double-click of error container?
+            // Creating a small useful snippet: double click on error-message to copy debug info (for developers)
+            const msgParagraph = document.querySelector('.error-message');
+            if (msgParagraph) {
+                msgParagraph.style.cursor = 'pointer';
+                msgParagraph.title = 'Double-click to copy forbidden path info (helpful for support)';
+                msgParagraph.addEventListener('dblclick', function (e) {
+                    const debugInfo = `Forbidden Resource: ${forbiddenPath}\nFull URL: ${fullUrl}\nTimestamp: ${new Date().toLocaleString()}\nUser-agent: ${navigator.userAgent}`;
+                    navigator.clipboard.writeText(debugInfo).then(() => {
+                        // Show a tiny non-intrusive notification via alert? Better: subtle temporary tooltip
+                        const originalText = this.innerText;
+                        this.innerText = '✓ Info copied to clipboard!';
+                        setTimeout(() => {
+                            this.innerText = originalText;
+                        }, 1500);
+                    }).catch(() => {
+                        alert('Could not copy. Manual: ' + debugInfo);
+                    });
+                });
+            }
+
+            // Also if you want to show user a hint after button click for login? all good.
+            // Additional: Provide custom 403 experience – if the user came from external link, we can show a small "referrer" hint in console.
+            if (document.referrer) {
+                console.info(`[403] Referrer: ${document.referrer} -> might help debugging access rules.`);
+            }
+
+            // If the project uses django.messages framework, we do not override, but pure front-end ready.
+        })();
+    </script>
+</body>
+
+</html>

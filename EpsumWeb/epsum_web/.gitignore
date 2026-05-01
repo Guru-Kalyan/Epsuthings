@@ -1,0 +1,10 @@
+.env
+.vscode
+node_modules
+__pycache__/
+__pycache__/*
+# Logs
+logs
+
+# Caching
+__pypackages__

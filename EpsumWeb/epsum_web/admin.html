@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EpsumThings — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#090b0f;--bg2:#0d1017;--sidebar:#0c0e14;--card:#11141b;--card-hover:#161a24;
+  --border:#1c2030;--border-hover:#2a2f42;
+  --text:#dfe1e8;--text2:#8e93a6;--text3:#545a70;
+  --accent:#e85018;--accent-light:#ff6b35;--accent-glow:#e8501825;
+  --green:#22c55e;--green-glow:#22c55e20;--red:#ef4444;--red-glow:#ef444420;
+  --blue:#3b82f6;--blue-glow:#3b82f620;--purple:#a855f7;--purple-glow:#a855f720;
+  --yellow:#eab308;--yellow-glow:#eab30820;
+  --white:#fff;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --radius:10px;--radius-lg:14px;
+  --sidebar-w:260px;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+html{font-size:15px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:24px 22px 20px;display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;border-bottom:1px solid var(--border)}
+.sidebar-logo .logo-icon{width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,#e85018,#ff6b35);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.72rem;color:var(--white)}
+.sidebar-logo span{color:var(--accent-light)}
+.sidebar-label{padding:20px 22px 8px;font-size:.65rem;font-weight:700;color:var(--text3);letter-spacing:.12em;text-transform:uppercase}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 10px}
+.sidebar-nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:.85rem;font-weight:500;color:var(--text2);border-radius:8px;transition:all .2s;cursor:pointer;text-decoration:none}
+.sidebar-nav a:hover{background:var(--card);color:var(--text)}
+.sidebar-nav a.active{background:var(--accent-glow);color:var(--accent-light);font-weight:600}
+.sidebar-nav a .nav-icon{font-size:1.05rem;width:22px;text-align:center}
+.sidebar-nav a .badge{margin-left:auto;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--accent);color:var(--white)}
+.sidebar-footer{margin-top:auto;padding:16px 22px;border-top:1px solid var(--border);font-size:.72rem;color:var(--text3)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+.topbar{display:flex;align-items:center;padding:16px 32px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50}
+.topbar h1{font-size:1.15rem;font-weight:700}
+.topbar .breadcrumb{font-size:.78rem;color:var(--text3);margin-left:12px}
+.topbar-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+.topbar-actions .avatar{width:34px;height:34px;border-radius:8px;background:var(--accent-glow);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:var(--accent-light)}
+
+.content{padding:28px 32px}
+
+/* PAGE VIEWS */
+.page-view{display:none}
+.page-view.active{display:block}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;transition:all .3s}
+.stat-card:hover{border-color:var(--border-hover)}
+.stat-card .stat-label{font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.stat-card .stat-value{font-family:var(--mono);font-size:1.8rem;font-weight:800}
+.stat-card .stat-change{font-size:.7rem;font-weight:600;margin-top:4px}
+.stat-card .stat-change.up{color:var(--green)}
+.stat-card .stat-change.down{color:var(--red)}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.toolbar .search-box{flex:1;min-width:200px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:.85rem;outline:none;transition:border-color .2s}
+.toolbar .search-box:focus{border-color:var(--accent)}
+.toolbar .search-box::placeholder{color:var(--text3)}
+.toolbar select{padding:10px 32px 10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:var(--font);font-size:.82rem;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23545a70' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+.toolbar select option{background:var(--card);color:var(--text)}
+.btn{padding:10px 20px;border-radius:8px;font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;border:none}
+.btn-accent{background:linear-gradient(135deg,#e85018,#ff6b35);color:var(--white);box-shadow:0 3px 12px var(--accent-glow)}
+.btn-accent:hover{transform:translateY(-1px);box-shadow:0 5px 20px var(--accent-glow)}
+.btn-ghost{background:var(--card);border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--border-hover);color:var(--text)}
+.btn-danger{background:var(--red-glow);border:1px solid #ef444440;color:var(--red)}
+.btn-danger:hover{background:var(--red);color:var(--white)}
+.btn-sm{padding:7px 14px;font-size:.75rem}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse}
+.data-table thead th{padding:12px 16px;font-size:.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;text-align:left;border-bottom:1px solid var(--border);background:var(--bg2)}
+.data-table tbody tr{border-bottom:1px solid var(--border);transition:background .2s}
+.data-table tbody tr:hover{background:var(--card)}
+.data-table tbody td{padding:14px 16px;font-size:.85rem;color:var(--text2)}
+.data-table .td-title{color:var(--text);font-weight:600}
+.data-table .td-actions{display:flex;gap:6px}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.table-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--text3)}
+
+/* STATUS BADGES */
+.badge-status{padding:4px 10px;border-radius:100px;font-size:.68rem;font-weight:700;letter-spacing:.03em}
+.badge-published{background:var(--green-glow);color:var(--green)}
+.badge-draft{background:var(--yellow-glow);color:var(--yellow)}
+.badge-new{background:var(--blue-glow);color:var(--blue)}
+.badge-read{background:var(--card);color:var(--text3);border:1px solid var(--border)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:720px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-header{display:flex;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border)}
+.modal-header h2{font-size:1.1rem;font-weight:700}
+.modal-header .modal-close{margin-left:auto;width:32px;height:32px;border-radius:8px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:1.1rem;transition:all .2s}
+.modal-header .modal-close:hover{background:var(--red-glow);border-color:var(--red);color:var(--red)}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+/* FORM FIELDS */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.02em}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:.85rem;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--text3)}
+.field textarea{min-height:140px;resize:vertical}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23545a70' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+.field select option{background:var(--card);color:var(--text)}
+.field .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .3s}
+.field .upload-zone:hover{border-color:var(--accent);background:var(--accent-glow)}
+.field .upload-zone .uz-icon{font-size:1.8rem;margin-bottom:8px;opacity:.5}
+.field .upload-zone p{font-size:.78rem;color:var(--text3)}
+.field .upload-zone .uz-label{font-size:.82rem;font-weight:600;color:var(--text2)}
+.field .char-count{font-size:.68rem;color:var(--text3);margin-top:4px;text-align:right}
+
+/* RICH TEXT TOOLBAR */
+.rte-toolbar{display:flex;gap:4px;padding:8px;background:var(--bg);border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;flex-wrap:wrap}
+.rte-toolbar button{padding:6px 10px;background:transparent;border:1px solid transparent;border-radius:4px;color:var(--text3);font-size:.82rem;cursor:pointer;font-family:var(--font);transition:all .2s}
+.rte-toolbar button:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+.rte-toolbar button.active{background:var(--accent-glow);color:var(--accent-light);border-color:var(--accent)}
+.rte-body{border:1px solid var(--border);border-radius:0 0 8px 8px;padding:16px;min-height:200px;background:var(--card);color:var(--text);font-size:.88rem;line-height:1.7;outline:none}
+.rte-body:focus{border-color:var(--accent)}
+.rte-body[placeholder]:empty::before{content:attr(placeholder);color:var(--text3)}
+
+/* INBOX MESSAGE DETAIL */
+.msg-detail{padding:24px}
+.msg-detail .msg-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.msg-detail .msg-from{font-size:1.05rem;font-weight:700;margin-bottom:4px}
+.msg-detail .msg-meta{font-size:.78rem;color:var(--text3);display:flex;gap:16px;flex-wrap:wrap}
+.msg-detail .msg-body{font-size:.9rem;line-height:1.75;color:var(--text2)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state .es-icon{font-size:3rem;margin-bottom:14px;opacity:.4}
+.empty-state h3{font-size:1rem;font-weight:600;color:var(--text2);margin-bottom:6px}
+.empty-state p{font-size:.82rem}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{width:60px;overflow:hidden}.sidebar-logo span,.sidebar-label,.sidebar-nav a span:not(.nav-icon),.sidebar-nav a .badge,.sidebar-footer{display:none}
+  .sidebar-logo{padding:16px 14px;justify-content:center}.sidebar-nav a{justify-content:center;padding:12px}
+  .main{margin-left:60px}.content{padding:20px 16px}.stats-row{grid-template-columns:repeat(2,1fr)}
+  .topbar{padding:12px 16px}.topbar .breadcrumb{display:none}
+}
+@media(max-width:600px){.stats-row{grid-template-columns:1fr}.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">ET</div>
+    <span>Admin</span>
+  </div>
+  <div class="sidebar-label">Content</div>
+  <nav class="sidebar-nav">
+    <a class="active" onclick="showPage('dashboard',this)"><span class="nav-icon">&#9632;</span><span>Dashboard</span></a>
+    <a onclick="showPage('blogs',this)"><span class="nav-icon">&#128196;</span><span>Blogs</span></a>
+    <a onclick="showPage('casestudies',this)"><span class="nav-icon">&#128202;</span><span>Case Studies</span></a>
+  </nav>
+  <div class="sidebar-label">Communications</div>
+  <nav class="sidebar-nav">
+    <a onclick="showPage('inbox',this)"><span class="nav-icon">&#128233;</span><span>Inbox</span><span class="badge" id="inboxBadge">3</span></a>
+    <a onclick="showPage('demos',this)"><span class="nav-icon">&#128197;</span><span>Demo Requests</span></a>
+  </nav>
+  <div class="sidebar-label">System</div>
+  <nav class="sidebar-nav">
+    <a onclick="showPage('api',this)"><span class="nav-icon">&#128268;</span><span>API Reference</span></a>
+  </nav>
+  <div class="sidebar-footer">EpsumThings CMS v1.0<br>&copy; 2026 Epsum Labs</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="pageTitle">Dashboard</h1>
+    <span class="breadcrumb" id="breadcrumb">Admin / Dashboard</span>
+    <div class="topbar-actions">
+      <button class="btn btn-accent btn-sm" onclick="window.open('index.html','_blank')">&#127760; View Site</button>
+      <div class="avatar">AD</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <div class="page-view active" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Published Blogs</div>
+          <div class="stat-value" id="statBlogs">6</div>
+          <div class="stat-change up">&#9650; 2 this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Case Studies</div>
+          <div class="stat-value" id="statCS">4</div>
+          <div class="stat-change up">&#9650; 1 this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Inbox Messages</div>
+          <div class="stat-value" id="statInbox">3</div>
+          <div class="stat-change">&#9679; 2 unread</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Demo Requests</div>
+          <div class="stat-value" id="statDemos">5</div>
+          <div class="stat-change up">&#9650; 3 this week</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:.95rem;font-weight:700;margin-bottom:14px">Recent Activity</h3>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Activity</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="td-title">New demo request from Tata Steel</td><td>Demo Request</td><td>Apr 21, 2026</td><td><span class="badge-status badge-new">New</span></td></tr>
+            <tr><td class="td-title">Blog "AI Agents in Plants" published</td><td>Blog</td><td>Apr 20, 2026</td><td><span class="badge-status badge-published">Published</span></td></tr>
+            <tr><td class="td-title">Contact form from Adani Power</td><td>Inbox</td><td>Apr 19, 2026</td><td><span class="badge-status badge-new">New</span></td></tr>
+            <tr><td class="td-title">Case study "Steel Plant" updated</td><td>Case Study</td><td>Apr 18, 2026</td><td><span class="badge-status badge-published">Published</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== BLOGS ==================== -->
+    <div class="page-view" id="page-blogs">
+      <div class="toolbar">
+        <input class="search-box" placeholder="Search blogs..." oninput="filterTable('blogTable',this.value)">
+        <select><option>All Status</option><option>Published</option><option>Draft</option></select>
+        <select><option>All Categories</option><option>Industrial AI</option><option>OT + IT</option><option>Analytics</option><option>Vision AI</option><option>Digitization</option></select>
+        <button class="btn btn-accent" onclick="openModal('blogModal')">&#43; New Blog</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="blogTable">
+          <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="blogTableBody">
+            <tr><td class="td-title">Why the Future of Industrial Operations Is Not SCADA</td><td>Industrial AI</td><td>Epsum Team</td><td>Mar 15, 2026</td><td><span class="badge-status badge-published">Published</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('blogModal')">Edit</button><button class="btn btn-ghost btn-sm" onclick="window.open('blog-template.html','_blank')">View</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+            <tr><td class="td-title">How AI Agents Are Changing Plant Operators</td><td>Industrial AI</td><td>Epsum Team</td><td>Mar 10, 2026</td><td><span class="badge-status badge-published">Published</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('blogModal')">Edit</button><button class="btn btn-ghost btn-sm" onclick="window.open('blog-template.html','_blank')">View</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+            <tr><td class="td-title">OT + IT Convergence: Beyond the Buzzword</td><td>OT + IT</td><td>Epsum Team</td><td>Feb 22, 2026</td><td><span class="badge-status badge-published">Published</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('blogModal')">Edit</button><button class="btn btn-ghost btn-sm" onclick="window.open('blog-template.html','_blank')">View</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+            <tr><td class="td-title">The Role of Digital Twins in Smart Plants</td><td>Analytics</td><td>Epsum Team</td><td>Feb 10, 2026</td><td><span class="badge-status badge-draft">Draft</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('blogModal')">Edit</button><button class="btn btn-ghost btn-sm">Preview</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer"><span>Showing 4 of 4 blogs</span><span>Page 1 of 1</span></div>
+      </div>
+    </div>
+
+    <!-- ==================== CASE STUDIES ==================== -->
+    <div class="page-view" id="page-casestudies">
+      <div class="toolbar">
+        <input class="search-box" placeholder="Search case studies..." oninput="filterTable('csTable',this.value)">
+        <select><option>All Industries</option><option>Steel</option><option>Energy</option><option>Manufacturing</option><option>Safety</option></select>
+        <button class="btn btn-accent" onclick="openModal('csModal')">&#43; New Case Study</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="csTable">
+          <thead><tr><th>Title</th><th>Industry</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="csTableBody">
+            <tr><td class="td-title">Integrated Monitoring Reduces Manual Reporting by 60%</td><td>Steel</td><td>Apr 18, 2026</td><td><span class="badge-status badge-published">Published</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('csModal')">Edit</button><button class="btn btn-ghost btn-sm" onclick="window.open('casestudy-template.html','_blank')">View</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+            <tr><td class="td-title">Remote Substation Monitoring Across 12 Sites</td><td>Energy</td><td>Apr 5, 2026</td><td><span class="badge-status badge-published">Published</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('csModal')">Edit</button><button class="btn btn-ghost btn-sm" onclick="window.open('casestudy-template.html','_blank')">View</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+            <tr><td class="td-title">Real-Time OEE and Energy Tracking</td><td>Manufacturing</td><td>Mar 28, 2026</td><td><span class="badge-status badge-published">Published</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('csModal')">Edit</button><button class="btn btn-ghost btn-sm" onclick="window.open('casestudy-template.html','_blank')">View</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+            <tr><td class="td-title">AI-Powered Safety Compliance</td><td>Safety</td><td>Mar 15, 2026</td><td><span class="badge-status badge-draft">Draft</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('csModal')">Edit</button><button class="btn btn-ghost btn-sm">Preview</button><button class="btn btn-danger btn-sm">&#128465;</button></td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer"><span>Showing 4 of 4 case studies</span><span>Page 1 of 1</span></div>
+      </div>
+    </div>
+
+    <!-- ==================== INBOX ==================== -->
+    <div class="page-view" id="page-inbox">
+      <div class="toolbar">
+        <input class="search-box" placeholder="Search messages...">
+        <select><option>All Types</option><option>Contact Form</option><option>Partnership</option><option>General</option></select>
+        <select><option>All Status</option><option>Unread</option><option>Read</option></select>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="inboxTable">
+          <thead><tr><th>From</th><th>Email</th><th>Type</th><th>Subject / Message</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td class="td-title">Rajesh Kumar</td><td>rajesh@adanipower.com</td><td>Contact Form</td><td>Interested in platform demo for our Mundra plant...</td><td>Apr 19, 2026</td><td><span class="badge-status badge-new">Unread</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="viewMessage(0)">View</button><button class="btn btn-ghost btn-sm">&#10003;</button></td></tr>
+            <tr><td class="td-title">Sarah Chen</td><td>sarah.chen@siemens.com</td><td>Partnership</td><td>Exploring integration partnership opportunities...</td><td>Apr 17, 2026</td><td><span class="badge-status badge-new">Unread</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="viewMessage(1)">View</button><button class="btn btn-ghost btn-sm">&#10003;</button></td></tr>
+            <tr><td class="td-title">Amit Sharma</td><td>amit@jswsteel.com</td><td>Contact Form</td><td>Need pricing info for 3-plant deployment...</td><td>Apr 15, 2026</td><td><span class="badge-status badge-read">Read</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm" onclick="viewMessage(2)">View</button></td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer"><span>Showing 3 messages</span><span>2 unread</span></div>
+      </div>
+    </div>
+
+    <!-- ==================== DEMO REQUESTS ==================== -->
+    <div class="page-view" id="page-demos">
+      <div class="toolbar">
+        <input class="search-box" placeholder="Search demo requests...">
+        <select><option>All Industries</option><option>Steel</option><option>Energy</option><option>Manufacturing</option><option>Process</option></select>
+        <select><option>All Status</option><option>New</option><option>Scheduled</option><option>Completed</option></select>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Industry</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td class="td-title">Vikram Patel</td><td>Tata Steel</td><td>vikram@tatasteel.com</td><td>Steel</td><td>Apr 21, 2026</td><td><span class="badge-status badge-new">New</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm">Schedule</button><button class="btn btn-ghost btn-sm">&#128231;</button></td></tr>
+            <tr><td class="td-title">Priya Nair</td><td>NTPC Ltd</td><td>priya@ntpc.co.in</td><td>Energy</td><td>Apr 20, 2026</td><td><span class="badge-status badge-new">New</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm">Schedule</button><button class="btn btn-ghost btn-sm">&#128231;</button></td></tr>
+            <tr><td class="td-title">Michael Torres</td><td>Schneider Electric</td><td>m.torres@se.com</td><td>Manufacturing</td><td>Apr 18, 2026</td><td><span class="badge-status badge-new">New</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm">Schedule</button><button class="btn btn-ghost btn-sm">&#128231;</button></td></tr>
+            <tr><td class="td-title">Deepak Menon</td><td>UltraTech Cement</td><td>deepak@ultratech.com</td><td>Process</td><td>Apr 15, 2026</td><td><span class="badge-status badge-published">Scheduled</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm">Details</button></td></tr>
+            <tr><td class="td-title">Ananya Roy</td><td>Hindalco</td><td>ananya@hindalco.com</td><td>Steel</td><td>Apr 12, 2026</td><td><span class="badge-status badge-read">Completed</span></td><td class="td-actions"><button class="btn btn-ghost btn-sm">Notes</button></td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer"><span>Showing 5 demo requests</span><span>3 pending</span></div>
+      </div>
+    </div>
+
+    <!-- ==================== API REFERENCE ==================== -->
+    <div class="page-view" id="page-api">
+      <div style="max-width:800px">
+        <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:8px">API Reference</h2>
+        <p style="font-size:.88rem;color:var(--text2);margin-bottom:28px">REST API endpoints for integrating your CMS with the EpsumThings website. Base URL: <code style="background:var(--card);padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:.8rem;color:var(--accent-light)">https://api.epsumthings.com/v1</code></p>
+
+        <div class="api-section" style="margin-bottom:32px">
+          <h3 style="font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">&#128196; Blog Endpoints</h3>
+          <div class="api-endpoints" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">List all blogs</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs/:slug</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Get single blog</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--blue-glow);color:var(--blue)">POST</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Create blog</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--yellow-glow);color:var(--yellow)">PUT</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs/:id</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Update blog</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--red-glow);color:var(--red)">DEL</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/blogs/:id</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Delete blog</span>
+          </div>
+        </div>
+
+        <div class="api-section" style="margin-bottom:32px">
+          <h3 style="font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">&#128202; Case Study Endpoints</h3>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/case-studies</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">List all</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/case-studies/:slug</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Get single</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--blue-glow);color:var(--blue)">POST</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/case-studies</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Create</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--yellow-glow);color:var(--yellow)">PUT</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/case-studies/:id</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Update</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--red-glow);color:var(--red)">DEL</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/case-studies/:id</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Delete</span>
+          </div>
+        </div>
+
+        <div class="api-section" style="margin-bottom:32px">
+          <h3 style="font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">&#128233; Communications Endpoints</h3>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--blue-glow);color:var(--blue)">POST</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/contact</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Submit contact form</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--blue-glow);color:var(--blue)">POST</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/demo-request</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Submit demo request</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--green-glow);color:var(--green)">GET</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/messages</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">List all messages</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--yellow-glow);color:var(--yellow)">PUT</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/messages/:id/read</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Mark as read</span>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+            <span style="font-family:var(--mono);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--blue-glow);color:var(--blue)">POST</span>
+            <code style="font-family:var(--mono);font-size:.8rem;color:var(--text)">/upload</code>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--text3)">Upload image (multipart)</span>
+          </div>
+        </div>
+
+        <p style="font-size:.78rem;color:var(--text3);margin-top:20px">Full API documentation with request/response schemas is available in the <code style="background:var(--card);padding:2px 6px;border-radius:3px;font-family:var(--mono);font-size:.72rem">api-server.js</code> file.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ==================== BLOG MODAL ==================== -->
+<div class="modal-overlay" id="blogModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>&#128196; Create / Edit Blog</h2>
+      <div class="modal-close" onclick="closeModal('blogModal')">&#10005;</div>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Title *</label><input placeholder="Enter blog title"></div>
+      <div class="field"><label>Slug</label><input placeholder="auto-generated-from-title" style="color:var(--text3)"></div>
+      <div class="field-row">
+        <div class="field"><label>Category *</label>
+          <select><option value="">Select category</option><option>Industrial AI</option><option>OT + IT</option><option>Analytics</option><option>Vision AI</option><option>Digitization</option><option>Transformation</option></select>
+        </div>
+        <div class="field"><label>Status *</label>
+          <select><option>Draft</option><option>Published</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Author</label><input placeholder="Epsum Team" value="Epsum Team"></div>
+        <div class="field"><label>Publish Date</label><input type="date"></div>
+      </div>
+      <div class="field"><label>Excerpt *</label><textarea placeholder="Short description for listing cards (max 200 chars)" style="min-height:80px"></textarea><div class="char-count">0 / 200</div></div>
+      <div class="field">
+        <label>Featured Image</label>
+        <div class="upload-zone">
+          <div class="uz-icon">&#128247;</div>
+          <p class="uz-label">Click to upload or drag and drop</p>
+          <p>PNG, JPG up to 5MB &middot; Recommended 1200x630px</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Content *</label>
+        <div class="rte-toolbar">
+          <button title="Bold"><b>B</b></button>
+          <button title="Italic"><i>I</i></button>
+          <button title="Heading">H2</button>
+          <button title="Heading">H3</button>
+          <button title="Quote">&#8220;</button>
+          <button title="Bullet List">&#8226;</button>
+          <button title="Numbered List">1.</button>
+          <button title="Code">&lt;/&gt;</button>
+          <button title="Link">&#128279;</button>
+          <button title="Image">&#128247;</button>
+        </div>
+        <div class="rte-body" contenteditable="true" placeholder="Write your blog content here..."></div>
+      </div>
+      <div class="field"><label>SEO Meta Description</label><textarea placeholder="SEO description (max 160 chars)" style="min-height:60px"></textarea><div class="char-count">0 / 160</div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('blogModal')">Cancel</button>
+      <button class="btn btn-ghost">Save Draft</button>
+      <button class="btn btn-accent">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CASE STUDY MODAL ==================== -->
+<div class="modal-overlay" id="csModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>&#128202; Create / Edit Case Study</h2>
+      <div class="modal-close" onclick="closeModal('csModal')">&#10005;</div>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Title *</label><input placeholder="Enter case study title"></div>
+      <div class="field"><label>Slug</label><input placeholder="auto-generated-from-title" style="color:var(--text3)"></div>
+      <div class="field-row">
+        <div class="field"><label>Industry *</label>
+          <select><option value="">Select industry</option><option>Steel & Metals</option><option>Energy & Utilities</option><option>Manufacturing</option><option>Process Industries</option><option>Safety & Compliance</option><option>Logistics</option></select>
+        </div>
+        <div class="field"><label>Status *</label>
+          <select><option>Draft</option><option>Published</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Client / Company Name</label><input placeholder="e.g. Leading Steel Manufacturer"></div>
+      <div class="field"><label>Overview *</label><textarea placeholder="Brief overview of the case study (2-3 sentences)" style="min-height:80px"></textarea></div>
+      <div class="field">
+        <label>Cover Image</label>
+        <div class="upload-zone">
+          <div class="uz-icon">&#128247;</div>
+          <p class="uz-label">Click to upload or drag and drop</p>
+          <p>PNG, JPG up to 5MB &middot; Recommended 1200x630px</p>
+        </div>
+      </div>
+      <div class="field"><label>Challenge</label><textarea placeholder="Describe the operational challenges the client faced..."></textarea></div>
+      <div class="field"><label>Solution</label><textarea placeholder="Describe how EpsumThings solved the challenges..."></textarea></div>
+      <div class="field"><label>Results / Impact</label><textarea placeholder="Describe measurable outcomes and impact..." style="min-height:100px"></textarea></div>
+      <h3 style="font-size:.88rem;font-weight:700;margin:8px 0 14px;color:var(--text2)">Key Metrics (up to 3)</h3>
+      <div class="field-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="field"><label>Metric 1 Value</label><input placeholder="e.g. 60%"></div>
+        <div class="field"><label>Metric 1 Label</label><input placeholder="e.g. Less Manual Work"></div>
+        <div></div>
+      </div>
+      <div class="field-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="field"><label>Metric 2 Value</label><input placeholder="e.g. 3x"></div>
+        <div class="field"><label>Metric 2 Label</label><input placeholder="e.g. Faster Decisions"></div>
+        <div></div>
+      </div>
+      <div class="field-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="field"><label>Metric 3 Value</label><input placeholder="e.g. 100%"></div>
+        <div class="field"><label>Metric 3 Label</label><input placeholder="e.g. Shift Visibility"></div>
+        <div></div>
+      </div>
+      <div class="field"><label>SEO Meta Description</label><textarea placeholder="SEO description (max 160 chars)" style="min-height:60px"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('csModal')">Cancel</button>
+      <button class="btn btn-ghost">Save Draft</button>
+      <button class="btn btn-accent">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MESSAGE DETAIL MODAL ==================== -->
+<div class="modal-overlay" id="msgModal">
+  <div class="modal" style="width:600px">
+    <div class="modal-header">
+      <h2>&#128233; Message Detail</h2>
+      <div class="modal-close" onclick="closeModal('msgModal')">&#10005;</div>
+    </div>
+    <div class="modal-body">
+      <div class="msg-detail">
+        <div class="msg-header">
+          <div class="msg-from" id="msgFrom">Rajesh Kumar</div>
+          <div class="msg-meta">
+            <span id="msgEmail">rajesh@adanipower.com</span>
+            <span id="msgType">Contact Form</span>
+            <span id="msgDate">Apr 19, 2026</span>
+          </div>
+        </div>
+        <div class="msg-body" id="msgBody">
+          Interested in platform demo for our Mundra thermal power plant. We currently use legacy SCADA across 5 units and are looking for a unified monitoring and analytics solution. Please share pricing for multi-unit deployment and schedule a technical demo with our engineering team.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('msgModal')">Close</button>
+      <button class="btn btn-ghost">Mark as Read</button>
+      <button class="btn btn-accent">Reply via Email &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Page navigation
+function showPage(id,el){
+  document.querySelectorAll('.page-view').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'Dashboard',blogs:'Blogs',casestudies:'Case Studies',inbox:'Inbox',demos:'Demo Requests',api:'API Reference'};
+  document.getElementById('pageTitle').textContent=titles[id]||id;
+  document.getElementById('breadcrumb').textContent='Admin / '+titles[id];
+}
+
+// Modals
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')});
+});
+
+// Table filter
+function filterTable(tableId,query){
+  const rows=document.getElementById(tableId).querySelectorAll('tbody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(query.toLowerCase())?'':'none'});
+}
+
+// View message
+const messages=[
+  {from:'Rajesh Kumar',email:'rajesh@adanipower.com',type:'Contact Form',date:'Apr 19, 2026',body:'Interested in platform demo for our Mundra thermal power plant. We currently use legacy SCADA across 5 units and are looking for a unified monitoring and analytics solution. Please share pricing for multi-unit deployment and schedule a technical demo with our engineering team.'},
+  {from:'Sarah Chen',email:'sarah.chen@siemens.com',type:'Partnership',date:'Apr 17, 2026',body:'We are exploring integration partnership opportunities with IIoT platform providers. Siemens is looking to offer complementary analytics and AI capabilities alongside our PLC and DCS product lines. Would love to discuss a technology partnership model with EpsumThings.'},
+  {from:'Amit Sharma',email:'amit@jswsteel.com',type:'Contact Form',date:'Apr 15, 2026',body:'Need pricing information for a 3-plant deployment across our facilities in Bellary, Vijayanagar, and Salem. We are interested in the unified data lake + Web-SCADA + Vision AI modules. Currently evaluating 3 platforms and need a detailed proposal by end of April.'}
+];
+function viewMessage(i){
+  const m=messages[i];
+  document.getElementById('msgFrom').textContent=m.from;
+  document.getElementById('msgEmail').textContent=m.email;
+  document.getElementById('msgType').textContent=m.type;
+  document.getElementById('msgDate').textContent=m.date;
+  document.getElementById('msgBody').textContent=m.body;
+  openModal('msgModal');
+}
+</script>
+</body>
+</html>

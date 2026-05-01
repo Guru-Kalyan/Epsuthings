@@ -1,0 +1,298 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Blogs — EpsumThings Admin{% endblock %}
+{% block page_title %}Blogs{% endblock %}
+{% block breadcrumb %}Blogs{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <input class="search-box" placeholder="Search blogs..." id="blogSearch">
+  <select id="statusFilter"><option value="">All Status</option><option value="published">Published</option><option value="draft">Draft</option></select>
+  <select id="categoryFilter"><option value="">All Categories</option></select>
+  <button class="btn btn-accent" onclick="openBlogModal()">&#43; New Blog</button>
+</div>
+<div class="table-wrap">
+  <table class="data-table" id="blogTable">
+    <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody id="blogTableBody">
+      <!-- Loaded via API -->
+    </tbody>
+  </table>
+  <div class="table-footer"><span id="blogCount">Showing 0 blogs</span></div>
+</div>
+
+<!-- BLOG MODAL -->
+<div class="modal-overlay" id="blogModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">&#128196; Create Blog</h2>
+      <div class="modal-close" onclick="closeModal('blogModal')">&#10005;</div>
+    </div>
+    <form id="blogForm">
+      <div class="modal-body">
+        <input type="hidden" id="blogId">
+        <div class="field"><label>Title *</label><input id="title" name="title" placeholder="Enter blog title" required></div>
+        <div class="field"><label>Slug</label><input id="slug" name="slug" placeholder="auto-generated-from-title"></div>
+        <div class="field-row">
+          <div class="field" style="flex: 1;"><label>Category *</label>
+            <div style="display: flex; gap: 8px;">
+              <select id="category" name="category" required style="flex: 1;"><option value="">Select category</option></select>
+              <button type="button" class="btn btn-ghost" style="padding: 0 12px;" onclick="openCategoryModal()">&#43;</button>
+            </div>
+          </div>
+          <div class="field"><label>Status *</label>
+            <select id="blog_status" name="blog_status" required><option value="draft">Draft</option><option value="published">Published</option></select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Author</label><input id="author" name="author" placeholder="Epsum Team" value="Epsum Team"></div>
+          <div class="field"><label>Publish Date</label><input id="publish_date" name="publish_date" type="date"></div>
+        </div>
+        <div class="field"><label>Excerpt *</label><textarea id="blog_desc" name="blog_desc" placeholder="Short description for listing cards (max 200 chars)" style="min-height:80px" required></textarea></div>
+        <div class="field">
+          <label>Featured Image</label>
+          <input type="file" id="feature_image" name="feature_image" style="display:none" onchange="previewImage(this)">
+          <div class="upload-zone" onclick="document.getElementById('feature_image').click()">
+            <div class="uz-icon" id="imagePreviewIcon">&#128247;</div>
+            <p class="uz-label" id="uploadLabel">Click to upload or drag and drop</p>
+            <p id="fileNameHint">PNG, JPG up to 5MB</p>
+          </div>
+        </div>
+        <div class="field">
+          <label>Content *</label>
+          <textarea id="content_hidden" name="content" style="display:none"></textarea>
+          <div class="rte-toolbar">
+            <button type="button" onclick="execCmd('bold')"><b>B</b></button>
+            <button type="button" onclick="execCmd('italic')"><i>I</i></button>
+            <button type="button" onclick="execCmd('formatBlock', 'H2')">H2</button>
+            <button type="button" onclick="execCmd('formatBlock', 'H3')">H3</button>
+            <button type="button" onclick="insertList('insertUnorderedList')">&#8226;</button>
+          </div>
+          <div id="editor" class="rte-body" contenteditable="true" placeholder="Write your blog content here..."></div>
+        </div>
+        <div class="field"><label>SEO Meta Description</label><textarea id="meta_desc" name="meta_desc" placeholder="SEO description (max 160 chars)" style="min-height:60px"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('blogModal')">Cancel</button>
+        <button type="submit" class="btn btn-accent" id="saveBtn">Save Blog</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CATEGORY MODAL -->
+<div class="modal-overlay" id="categoryModal" style="z-index: 300;">
+  <div class="modal" style="width: 400px;">
+    <div class="modal-header">
+      <h2>&#128193; Add New Category</h2>
+      <div class="modal-close" onclick="closeModal('categoryModal')">&#10005;</div>
+    </div>
+    <form id="categoryForm">
+      <div class="modal-body">
+        <div class="field"><label>Category Name *</label><input id="new_category_name" name="category_name" placeholder="e.g. Technology" required></div>
+        <div class="field"><label>Description</label><textarea id="new_category_desc" name="description" placeholder="Optional description" style="min-height: 60px;"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('categoryModal')">Cancel</button>
+        <button type="submit" class="btn btn-accent">Add Category</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let blogs = [];
+let categories = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchCategories();
+    fetchBlogs();
+});
+
+async function fetchCategories() {
+    const res = await fetch('/masters/read_blog_category/', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        categories = data.data;
+        const select = document.getElementById('category');
+        const filter = document.getElementById('categoryFilter');
+        
+        // Clear existing options except first
+        select.innerHTML = '<option value="">Select category</option>';
+        filter.innerHTML = '<option value="">All Categories</option>';
+        
+        categories.forEach(c => {
+            select.innerHTML += `<option value="${c.category_id}">${c.category_name}</option>`;
+            filter.innerHTML += `<option value="${c.category_name}">${c.category_name}</option>`;
+        });
+    }
+}
+
+function openCategoryModal() {
+    document.getElementById('categoryForm').reset();
+    openModal('categoryModal');
+}
+
+document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = {
+        category_name: formData.get('category_name'),
+        description: formData.get('description')
+    };
+
+    const res = await fetch('/masters/create_blog_category/', {
+        method: 'POST',
+        headers: { 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (data.status === 'success') {
+        closeModal('categoryModal');
+        await fetchCategories();
+        // Automatically select the newly created category
+        document.getElementById('category').value = data.id;
+    } else {
+        alert(data.msg);
+    }
+});
+
+async function fetchBlogs() {
+    const res = await fetch('/blogs/read_blog/');
+    const data = await res.json();
+    if (data.status === 'success') {
+        blogs = data.data;
+        renderBlogs(blogs);
+    }
+}
+
+function renderBlogs(items) {
+    const tbody = document.getElementById('blogTableBody');
+    tbody.innerHTML = items.map(blog => `
+        <tr>
+            <td class="td-title">${blog.blog_title}</td>
+            <td>${blog.category}</td>
+            <td>${blog.author || 'N/A'}</td>
+            <td>${blog.publish_date || 'N/A'}</td>
+            <td><span class="badge-status badge-${blog.blog_status.toLowerCase()}">${blog.blog_status}</span></td>
+            <td class="td-actions">
+                <button class="btn btn-ghost btn-sm" onclick="editBlog(${blog.blog_id})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteBlog(${blog.blog_id})">&#128465;</button>
+            </td>
+        </tr>
+    `).join('');
+    document.getElementById('blogCount').textContent = `Showing ${items.length} blogs`;
+}
+
+function openBlogModal() {
+    document.getElementById('blogForm').reset();
+    document.getElementById('blogId').value = '';
+    document.getElementById('editor').innerHTML = '';
+    document.getElementById('modalTitle').innerHTML = '&#128196; Create Blog';
+    document.getElementById('uploadLabel').textContent = 'Click to upload or drag and drop';
+    openModal('blogModal');
+}
+
+function editBlog(id) {
+    const blog = blogs.find(b => b.blog_id === id);
+    if (!blog) return;
+    
+    document.getElementById('blogId').value = blog.blog_id;
+    document.getElementById('title').value = blog.blog_title;
+    document.getElementById('slug').value = blog.slug;
+    document.getElementById('author').value = blog.author;
+    document.getElementById('publish_date').value = blog.publish_date;
+    document.getElementById('blog_desc').value = blog.blog_desc;
+    document.getElementById('editor').innerHTML = blog.content;
+    document.getElementById('meta_desc').value = blog.meta_desc;
+    
+    // Set category select
+    const catOption = Array.from(document.getElementById('category').options).find(o => o.text === blog.category);
+    if (catOption) document.getElementById('category').value = catOption.value;
+    
+    document.getElementById('blog_status').value = blog.blog_status;
+    document.getElementById('modalTitle').innerHTML = '&#128196; Edit Blog';
+    
+    if (blog.feature_image) {
+        document.getElementById('uploadLabel').textContent = 'Image attached (click to change)';
+    }
+
+    openModal('blogModal');
+}
+
+document.getElementById('blogForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('blogId').value;
+    const formData = new FormData(e.target);
+    formData.append('content', document.getElementById('editor').innerHTML);
+    
+    let url = '/blogs/create_blog/';
+    if (id) {
+        url = `/blogs/update_blog/${id}/`;
+        formData.append('_method', 'PUT');
+    }
+    
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: formData
+    });
+    
+    const data = await res.json();
+    if (data.status === 'success') {
+        closeModal('blogModal');
+        fetchBlogs();
+    } else {
+        alert(data.msg);
+    }
+});
+
+async function deleteBlog(id) {
+    if (!confirm('Are you sure you want to delete this blog?')) return;
+    const res = await fetch(`/blogs/delete_blog/${id}/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        fetchBlogs();
+    }
+}
+
+function execCmd(cmd, val = null) { document.execCommand(cmd, false, val); }
+function insertList(cmd) { document.execCommand(cmd, false, null); }
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        document.getElementById('uploadLabel').textContent = input.files[0].name;
+    }
+}
+
+// Filters
+document.getElementById('blogSearch').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+
+function applyFilters() {
+    const q = document.getElementById('blogSearch').value.toLowerCase();
+    const s = document.getElementById('statusFilter').value;
+    const c = document.getElementById('categoryFilter').value;
+    
+    const filtered = blogs.filter(b => {
+        const matchesSearch = b.blog_title.toLowerCase().includes(q);
+        const matchesStatus = !s || b.blog_status === s;
+        const matchesCat = !c || b.category === c;
+        return matchesSearch && matchesStatus && matchesCat;
+    });
+    renderBlogs(filtered);
+}
+</script>
+{% endblock %}

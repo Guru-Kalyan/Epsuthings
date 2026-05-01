@@ -1,0 +1,1069 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Epsum Web",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8001"
+    },
+    {
+      "url": "http://192.168.1.64:8001"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "noauthAuth": {
+        "type": "http",
+        "scheme": "noauth"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Masters"
+    },
+    {
+      "name": "Masters > Blog Category"
+    },
+    {
+      "name": "Masters > Industry Type"
+    },
+    {
+      "name": "Masters > Inquiry Type"
+    },
+    {
+      "name": "Blogs"
+    },
+    {
+      "name": "Case Studies"
+    },
+    {
+      "name": "Communication"
+    },
+    {
+      "name": "Communication > Inbox"
+    },
+    {
+      "name": "Communication > Demo Request"
+    }
+  ],
+  "paths": {
+    "/users/register/": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Register User",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "email": "linkankumarrout24@gmail.com",
+                  "password": "linkan@1234"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/users/login/": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Login User",
+        "requestBody": {
+          "content": {}
+        },
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Authenticate bGlua2Fua3VtYXJyb3V0MjRAZ21haWwuY29tOmJHbHVhMkZ1UURFeU16UT0="
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/read_blog_category/": {
+      "get": {
+        "tags": [
+          "Masters > Blog Category"
+        ],
+        "summary": "Get All Blog Category",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/create_blog_category/": {
+      "post": {
+        "tags": [
+          "Masters > Blog Category"
+        ],
+        "summary": "Create Blog Category",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "category_name": "Transformation",
+                  "description": "Transformation Description"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/update_blog_category/1/": {
+      "put": {
+        "tags": [
+          "Masters > Blog Category"
+        ],
+        "summary": "Update Blog Category",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "string",
+                "example": "\"{\\r\\n    \\\"category_name\\\": \\\"Industrial AI\\\",\\r\\n    \\\"description\\\": \\\"Industrial AI desc updated\\\"\\r\\n}\""
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/delete_blog_category/1/": {
+      "delete": {
+        "tags": [
+          "Masters > Blog Category"
+        ],
+        "summary": "Delete Blog Category",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/read_industry_type/": {
+      "get": {
+        "tags": [
+          "Masters > Industry Type"
+        ],
+        "summary": "Get All Industry Type",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/create_industry_type/": {
+      "post": {
+        "tags": [
+          "Masters > Industry Type"
+        ],
+        "summary": "Create Industry Type",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "industry_type_name": "Healthcare",
+                  "description": "Healthcare description"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/update_industry_type/1/": {
+      "put": {
+        "tags": [
+          "Masters > Industry Type"
+        ],
+        "summary": "Update Industry Type",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "string",
+                "example": "\"{\\r\\n    \\\"industry_type_name\\\": \\\"Logistics\\\",\\r\\n    \\\"description\\\": \\\"Logistics description updated\\\"\\r\\n}\""
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/delete_industry_type/2/": {
+      "delete": {
+        "tags": [
+          "Masters > Industry Type"
+        ],
+        "summary": "Delete Industry Type",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/read_inquiry_type/": {
+      "get": {
+        "tags": [
+          "Masters > Inquiry Type"
+        ],
+        "summary": "Get All Inquiry Type",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/create_inquiry_type/": {
+      "post": {
+        "tags": [
+          "Masters > Inquiry Type"
+        ],
+        "summary": "Create Inquiry Type",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "inquiry_type_name": "Price Calculation",
+                  "description": "",
+                  "inquiry_type": "2"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/update_inquiry_type/2/": {
+      "put": {
+        "tags": [
+          "Masters > Inquiry Type"
+        ],
+        "summary": "Update Inquiry Type",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "inquiry_type": "Inbox"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/masters/delete_inquiry_type/2/": {
+      "delete": {
+        "tags": [
+          "Masters > Inquiry Type"
+        ],
+        "summary": "Delete Inquiry Type",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/blogs/read_blog/": {
+      "get": {
+        "tags": [
+          "Blogs"
+        ],
+        "summary": "Get All Blogs",
+        "security": [
+          {
+            "noauthAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/blogs/create_blog/": {
+      "post": {
+        "tags": [
+          "Blogs"
+        ],
+        "summary": "Create Blog",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "My First Blog"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "example": "my-first-blog"
+                  },
+                  "category": {
+                    "type": "integer",
+                    "example": "7"
+                  },
+                  "blog_status": {
+                    "type": "string",
+                    "example": "Draft"
+                  },
+                  "author": {
+                    "type": "string",
+                    "example": "Rohit Jamwal"
+                  },
+                  "publish_date": {
+                    "type": "string",
+                    "example": "2026-04-22"
+                  },
+                  "blog_desc": {
+                    "type": "string",
+                    "example": "This is a short description of the blog."
+                  },
+                  "content": {
+                    "type": "string",
+                    "example": "This is the full blog content."
+                  },
+                  "meta_desc": {
+                    "type": "string",
+                    "example": "SEO meta description"
+                  },
+                  "feature_image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/blogs/update_blog/8/": {
+      "post": {
+        "tags": [
+          "Blogs"
+        ],
+        "summary": "Update Blog",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "My First Blog1"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "example": "my-first-blog1"
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "Transformation"
+                  },
+                  "blog_status": {
+                    "type": "string",
+                    "example": "Draft"
+                  },
+                  "author": {
+                    "type": "string",
+                    "example": "Rohit Jamwal"
+                  },
+                  "publish_date": {
+                    "type": "string",
+                    "example": "2026-04-22"
+                  },
+                  "blog_desc": {
+                    "type": "string",
+                    "example": "This is a short description of the blog."
+                  },
+                  "content": {
+                    "type": "string",
+                    "example": "This is the full blog content."
+                  },
+                  "meta_desc": {
+                    "type": "string",
+                    "example": "SEO meta description"
+                  },
+                  "feature_image": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "_method": {
+                    "type": "string",
+                    "example": "PUT"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/blogs/delete_blog/7/": {
+      "delete": {
+        "tags": [
+          "Blogs"
+        ],
+        "summary": "Delete a Blog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/case_studies/read_case_study/": {
+      "get": {
+        "tags": [
+          "Case Studies"
+        ],
+        "summary": "Get All Case Studies",
+        "security": [
+          {
+            "noauthAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/case_studies/create_case_study/": {
+      "post": {
+        "tags": [
+          "Case Studies"
+        ],
+        "summary": "Create New Case Study",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "AI Optimization in Steel Manufacturing"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "example": "ai-optimization-steel-manufacturing"
+                  },
+                  "industry": {
+                    "type": "integer",
+                    "example": "2"
+                  },
+                  "case_study_status": {
+                    "type": "string",
+                    "example": "Published"
+                  },
+                  "company_name": {
+                    "type": "string",
+                    "example": "Tata Steel"
+                  },
+                  "overview": {
+                    "type": "string",
+                    "example": "This case study explores how AI improved efficiency in steel production."
+                  },
+                  "cover_image": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "challenges": {
+                    "type": "string",
+                    "example": "High energy consumption and inconsistent output quality."
+                  },
+                  "solutions": {
+                    "type": "string",
+                    "example": "Implemented predictive analytics and real-time monitoring."
+                  },
+                  "results": {
+                    "type": "string",
+                    "example": "Reduced energy consumption by 20% and improved output consistency."
+                  },
+                  "key_metrics": {
+                    "type": "string",
+                    "example": "{\n\"energy_reduction\": \"20%\",\n\"cost_savings\": \"15%\",\n\"downtime_reduction\": \"30%\"\n}"
+                  },
+                  "meta_desc": {
+                    "type": "string",
+                    "example": "AI-driven optimization in steel manufacturing improving efficiency and reducing costs."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/case_studies/update_case_study/2/": {
+      "post": {
+        "tags": [
+          "Case Studies"
+        ],
+        "summary": "Update Case Study",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "AI Optimization in Steel Manufacturing"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "example": "ai-optimization-steel-manufacturing"
+                  },
+                  "industry": {
+                    "type": "integer",
+                    "example": "2"
+                  },
+                  "case_study_status": {
+                    "type": "string",
+                    "example": "Published"
+                  },
+                  "company_name": {
+                    "type": "string",
+                    "example": "Tata Steel"
+                  },
+                  "overview": {
+                    "type": "string",
+                    "example": "Updated overview content for case study"
+                  },
+                  "cover_image": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "challenges": {
+                    "type": "string",
+                    "example": "High energy consumption and inconsistent output quality."
+                  },
+                  "solutions": {
+                    "type": "string",
+                    "example": "Implemented predictive analytics and real-time monitoring."
+                  },
+                  "results": {
+                    "type": "string",
+                    "example": "Reduced energy consumption by 20% and improved output consistency."
+                  },
+                  "key_metrics": {
+                    "type": "string",
+                    "example": "{\n\"energy_reduction\": \"20%\",\n\"cost_savings\": \"15%\",\n\"downtime_reduction\": \"30%\"\n}"
+                  },
+                  "meta_desc": {
+                    "type": "string",
+                    "example": "AI-driven optimization in steel manufacturing improving efficiency and reducing costs."
+                  },
+                  "_method": {
+                    "type": "string",
+                    "example": "PUT"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/case_studies/delete_case_study/2/": {
+      "delete": {
+        "tags": [
+          "Case Studies"
+        ],
+        "summary": "Delete a Case Study",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/read_inbox/": {
+      "get": {
+        "tags": [
+          "Communication > Inbox"
+        ],
+        "summary": "Get All Inboxes",
+        "security": [
+          {
+            "noauthAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/create_inbox/": {
+      "post": {
+        "tags": [
+          "Communication > Inbox"
+        ],
+        "summary": "Create Inbox",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "sender": "Sarah Chen",
+                  "email": "sarah.chen@siemens.com",
+                  "mobile_no": "775087512567",
+                  "company_name": "Siemens",
+                  "job_title": "Manager",
+                  "inquiry_type": "1",
+                  "industry": "1",
+                  "message": "We are exploring integration partnership opportunities with IIoT platform providers. Siemens is looking to offer complementary analytics and AI capabilities alongside our PLC and DCS product lines. Would love to discuss a technology partnership model with EpsumThings."
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "noauthAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/update_inbox/1/": {
+      "put": {
+        "tags": [
+          "Communication > Inbox"
+        ],
+        "summary": "Update Inbox Status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "read_status": "read"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/delete_inbox/2/": {
+      "delete": {
+        "tags": [
+          "Communication > Inbox"
+        ],
+        "summary": "Delete Inbox",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/read_demo_request/": {
+      "get": {
+        "tags": [
+          "Communication > Demo Request"
+        ],
+        "summary": "Get All Demo Request",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/create_demo_request/": {
+      "post": {
+        "tags": [
+          "Communication > Demo Request"
+        ],
+        "summary": "Create Demo Request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "sender_name": "Vikram Patel",
+                  "company_name": "Tata Steel",
+                  "email": "vikram@tatasteel.com",
+                  "mobile_no": "7750875567",
+                  "job_title": "Manager",
+                  "inquiry_type": "1",
+                  "industry": "2",
+                  "message": "Nothing to add just for testing"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/update_demo_request/1/": {
+      "put": {
+        "tags": [
+          "Communication > Demo Request"
+        ],
+        "summary": "Update Demo Request Status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "req_status": "scheduled"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/communication/delete_demo_request/2/": {
+      "delete": {
+        "tags": [
+          "Communication > Demo Request"
+        ],
+        "summary": "Delete Demo Request",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

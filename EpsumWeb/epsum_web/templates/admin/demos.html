@@ -1,0 +1,178 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Demo Requests — EpsumThings Admin{% endblock %}
+{% block page_title %}Demo Requests{% endblock %}
+{% block breadcrumb %}Demo Requests{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <input class="search-box" placeholder="Search requests..." id="demoSearch">
+  <select id="statusFilter">
+      <option value="">All Status</option>
+      <option value="new">New</option>
+      <option value="scheduled">Scheduled</option>
+      <option value="completed">Completed</option>
+      <option value="cancelled">Cancelled</option>
+  </select>
+</div>
+<div class="table-wrap">
+  <table class="data-table" id="demoTable">
+    <thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Industry</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody id="demoTableBody">
+      <!-- Loaded via API -->
+    </tbody>
+  </table>
+  <div class="table-footer"><span id="demoCount">Showing 0 requests</span></div>
+</div>
+
+<!-- DEMO DETAIL MODAL -->
+<div class="modal-overlay" id="demoModal">
+  <div class="modal" style="width:600px">
+    <div class="modal-header">
+      <h2>&#128200; Demo Request Detail</h2>
+      <div class="modal-close" onclick="closeModal('demoModal')">&#10005;</div>
+    </div>
+    <div class="modal-body">
+      <div class="msg-detail">
+        <div class="msg-header">
+          <div class="msg-from" id="demoName"></div>
+          <div class="msg-meta">
+            <span id="demoEmail"></span>
+            <span id="demoCompany"></span>
+            <span id="demoDate"></span>
+          </div>
+        </div>
+        <div style="margin-bottom:16px; font-size:.9rem; color:var(--text3)">
+            <strong>Job Title:</strong> <span id="demoJob"></span> | 
+            <strong>Industry:</strong> <span id="demoIndustry"></span>
+        </div>
+        <div class="msg-body" id="demoMessage"></div>
+        
+        <div class="field" style="margin-top:20px">
+            <label>Update Status</label>
+            <select id="demoStatusUpdate" onchange="updateDemoStatus()">
+                <option value="new">New</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('demoModal')">Close</button>
+      <a class="btn btn-accent" id="demoReplyBtn" href="#">Contact via Email &#8594;</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let demos = [];
+const statusMap = {
+    'new': { label: 'New', class: 'badge-new' },
+    'scheduled': { label: 'Scheduled', class: 'badge-published' },
+    'completed': { label: 'Completed', class: 'badge-read' },
+    'cancelled': { label: 'Cancelled', class: 'badge-draft' }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchDemos();
+});
+
+async function fetchDemos() {
+    const res = await fetch('/communication/read_demo_request/', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        demos = data.data;
+        renderDemos(demos);
+    }
+}
+
+function renderDemos(items) {
+    const tbody = document.getElementById('demoTableBody');
+    tbody.innerHTML = items.map(d => `
+        <tr>
+            <td class="td-title">${d.sender_name}</td>
+            <td>${d.company_name}</td>
+            <td>${d.email}</td>
+            <td>${d.industry || 'N/A'}</td>
+            <td>${new Date(d.date).toLocaleDateString()}</td>
+            <td><span class="badge-status ${statusMap[d.req_status]?.class || 'badge-new'}">${statusMap[d.req_status]?.label || 'New'}</span></td>
+            <td class="td-actions">
+                <button class="btn btn-ghost btn-sm" onclick="viewDemo(${d.demo_request_id})">Details</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteDemo(${d.demo_request_id})">&#128465;</button>
+            </td>
+        </tr>
+    `).join('');
+    document.getElementById('demoCount').textContent = `Showing ${items.length} requests`;
+}
+
+let currentDemoId = null;
+
+function viewDemo(id) {
+    const d = demos.find(item => item.demo_request_id === id);
+    if (!d) return;
+    
+    currentDemoId = id;
+    document.getElementById('demoName').textContent = d.sender_name;
+    document.getElementById('demoEmail').textContent = d.email;
+    document.getElementById('demoCompany').textContent = d.company_name;
+    document.getElementById('demoDate').textContent = new Date(d.date).toLocaleString();
+    document.getElementById('demoJob').textContent = d.job_title || 'N/A';
+    document.getElementById('demoIndustry').textContent = d.industry || 'N/A';
+    document.getElementById('demoMessage').textContent = d.message || 'No message provided.';
+    document.getElementById('demoStatusUpdate').value = d.req_status;
+    document.getElementById('demoReplyBtn').href = `mailto:${d.email}`;
+    
+    openModal('demoModal');
+}
+
+async function updateDemoStatus() {
+    const newStatus = document.getElementById('demoStatusUpdate').value;
+    const res = await fetch(`/communication/update_demo_request/${currentDemoId}/`, {
+        method: 'PUT',
+        headers: { 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ req_status: newStatus })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        fetchDemos();
+    }
+}
+
+async function deleteDemo(id) {
+    if (!confirm('Are you sure you want to delete this request?')) return;
+    const res = await fetch(`/communication/delete_demo_request/${id}/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        fetchDemos();
+    }
+}
+
+// Filters
+document.getElementById('demoSearch').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+function applyFilters() {
+    const q = document.getElementById('demoSearch').value.toLowerCase();
+    const s = document.getElementById('statusFilter').value;
+    
+    const filtered = demos.filter(d => {
+        const matchesSearch = d.sender_name.toLowerCase().includes(q) || d.company_name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q);
+        const matchesStatus = s === '' || String(d.req_status) === s;
+        return matchesSearch && matchesStatus;
+    });
+    renderDemos(filtered);
+}
+</script>
+{% endblock %}

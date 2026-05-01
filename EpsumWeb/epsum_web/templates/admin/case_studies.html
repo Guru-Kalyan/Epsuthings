@@ -1,0 +1,310 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Case Studies — EpsumThings Admin{% endblock %}
+{% block page_title %}Case Studies{% endblock %}
+{% block breadcrumb %}Case Studies{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <input class="search-box" placeholder="Search case studies..." id="csSearch">
+  <select id="industryFilter"><option value="">All Industries</option></select>
+  <select id="statusFilter"><option value="">All Status</option><option value="published">Published</option><option value="draft">Draft</option></select>
+  <button class="btn btn-accent" onclick="openCSModal()">&#43; New Case Study</button>
+</div>
+<div class="table-wrap">
+  <table class="data-table" id="csTable">
+    <thead><tr><th>Title</th><th>Industry</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody id="csTableBody">
+      <!-- Loaded via API -->
+    </tbody>
+  </table>
+  <div class="table-footer"><span id="csCount">Showing 0 case studies</span></div>
+</div>
+
+<!-- CASE STUDY MODAL -->
+<div class="modal-overlay" id="csModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="csModalTitle">&#128202; Create Case Study</h2>
+      <div class="modal-close" onclick="closeModal('csModal')">&#10005;</div>
+    </div>
+    <form id="csForm">
+      <div class="modal-body">
+        <input type="hidden" id="csId">
+        <div class="field"><label>Title *</label><input id="cs_title" name="title" placeholder="Enter case study title" required></div>
+        <div class="field"><label>Slug</label><input id="cs_slug" name="slug" placeholder="auto-generated-from-title"></div>
+        <div class="field-row">
+          <div class="field" style="flex: 1;"><label>Industry *</label>
+            <div style="display: flex; gap: 8px;">
+              <select id="cs_industry" name="industry" required style="flex: 1;"><option value="">Select industry</option></select>
+              <button type="button" class="btn btn-ghost" style="padding: 0 12px;" onclick="openIndustryModal()">&#43;</button>
+            </div>
+          </div>
+          <div class="field"><label>Status *</label>
+            <select id="cs_status" name="case_study_status" required><option value="draft">Draft</option><option value="published">Published</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Client / Company Name</label><input id="company_name" name="company_name" placeholder="e.g. Leading Steel Manufacturer"></div>
+        <div class="field"><label>Overview *</label><textarea id="overview" name="overview" placeholder="Brief overview of the case study (2-3 sentences)" style="min-height:80px" required></textarea></div>
+        <div class="field">
+          <label>Cover Image</label>
+          <input type="file" id="cover_image" name="cover_image" style="display:none" onchange="previewCSImage(this)">
+          <div class="upload-zone" onclick="document.getElementById('cover_image').click()">
+            <div class="uz-icon" id="csImagePreviewIcon">&#128247;</div>
+            <p class="uz-label" id="csUploadLabel">Click to upload or drag and drop</p>
+          </div>
+        </div>
+        <div class="field"><label>Challenge</label><textarea id="challenges" name="challenges" placeholder="Describe the operational challenges the client faced..."></textarea></div>
+        <div class="field"><label>Solution</label><textarea id="solutions" name="solutions" placeholder="Describe how EpsumThings solved the challenges..."></textarea></div>
+        <div class="field"><label>Results / Impact</label><textarea id="results" name="results" placeholder="Describe measurable outcomes and impact..." style="min-height:100px"></textarea></div>
+        
+        <h3 style="font-size:.88rem;font-weight:700;margin:8px 0 14px;color:var(--text2)">Key Metrics (up to 3)</h3>
+        <div id="metricsContainer">
+          <div class="field-row" style="grid-template-columns:1fr 1fr">
+            <div class="field"><label>Metric 1 Value</label><input id="m1v" placeholder="e.g. 60%"></div>
+            <div class="field"><label>Metric 1 Label</label><input id="m1l" placeholder="e.g. Less Manual Work"></div>
+          </div>
+          <div class="field-row" style="grid-template-columns:1fr 1fr">
+            <div class="field"><label>Metric 2 Value</label><input id="m2v" placeholder="e.g. 3x"></div>
+            <div class="field"><label>Metric 2 Label</label><input id="m2l" placeholder="e.g. Faster Decisions"></div>
+          </div>
+          <div class="field-row" style="grid-template-columns:1fr 1fr">
+            <div class="field"><label>Metric 3 Value</label><input id="m3v" placeholder="e.g. 100%"></div>
+            <div class="field"><label>Metric 3 Label</label><input id="m3l" placeholder="e.g. Shift Visibility"></div>
+          </div>
+        </div>
+
+        <div class="field"><label>SEO Meta Description</label><textarea id="cs_meta_desc" name="meta_desc" placeholder="SEO description (max 160 chars)" style="min-height:60px"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('csModal')">Cancel</button>
+        <button type="submit" class="btn btn-accent">Save Case Study</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- INDUSTRY MODAL -->
+<div class="modal-overlay" id="industryModal" style="z-index: 300;">
+  <div class="modal" style="width: 400px;">
+    <div class="modal-header">
+      <h2>&#128200; Add New Industry</h2>
+      <div class="modal-close" onclick="closeModal('industryModal')">&#10005;</div>
+    </div>
+    <form id="industryForm">
+      <div class="modal-body">
+        <div class="field"><label>Industry Name *</label><input id="new_industry_name" name="industry_type_name" placeholder="e.g. Manufacturing" required></div>
+        <div class="field"><label>Description</label><textarea id="new_industry_desc" name="description" placeholder="Optional description" style="min-height: 60px;"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('industryModal')">Cancel</button>
+        <button type="submit" class="btn btn-accent">Add Industry</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let caseStudies = [];
+let industries = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchIndustries();
+    fetchCaseStudies();
+});
+
+async function fetchIndustries() {
+    const res = await fetch('/masters/read_industry_type/', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        industries = data.data;
+        const select = document.getElementById('cs_industry');
+        const filter = document.getElementById('industryFilter');
+        
+        // Clear existing options except first
+        select.innerHTML = '<option value="">Select industry</option>';
+        filter.innerHTML = '<option value="">All Industries</option>';
+        
+        industries.forEach(i => {
+            select.innerHTML += `<option value="${i.industry_type_id}">${i.industry_type_name}</option>`;
+            filter.innerHTML += `<option value="${i.industry_type_name}">${i.industry_type_name}</option>`;
+        });
+    }
+}
+
+function openIndustryModal() {
+    document.getElementById('industryForm').reset();
+    openModal('industryModal');
+}
+
+document.getElementById('industryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = {
+        industry_type_name: formData.get('industry_type_name'),
+        description: formData.get('description')
+    };
+
+    const res = await fetch('/masters/create_industry_type/', {
+        method: 'POST',
+        headers: { 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (data.status === 'success') {
+        closeModal('industryModal');
+        await fetchIndustries();
+        // Automatically select the newly created industry
+        document.getElementById('cs_industry').value = data.id;
+    } else {
+        alert(data.msg);
+    }
+});
+
+async function fetchCaseStudies() {
+    const res = await fetch('/case_studies/read_case_study/');
+    const data = await res.json();
+    if (data.status === 'success') {
+        caseStudies = data.data;
+        renderCS(caseStudies);
+    }
+}
+
+function renderCS(items) {
+    const tbody = document.getElementById('csTableBody');
+    tbody.innerHTML = items.map(cs => `
+        <tr>
+            <td class="td-title">${cs.case_studies_title}</td>
+            <td>${cs.industry}</td>
+            <td><span class="badge-status badge-${cs.case_study_status.toLowerCase()}">${cs.case_study_status}</span></td>
+            <td class="td-actions">
+                <button class="btn btn-ghost btn-sm" onclick="editCS(${cs.case_studies_id})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteCS(${cs.case_studies_id})">&#128465;</button>
+            </td>
+        </tr>
+    `).join('');
+    document.getElementById('csCount').textContent = `Showing ${items.length} case studies`;
+}
+
+function openCSModal() {
+    document.getElementById('csForm').reset();
+    document.getElementById('csId').value = '';
+    document.getElementById('csModalTitle').innerHTML = '&#128202; Create Case Study';
+    document.getElementById('csUploadLabel').textContent = 'Click to upload or drag and drop';
+    openModal('csModal');
+}
+
+function editCS(id) {
+    const cs = caseStudies.find(b => b.case_studies_id === id);
+    if (!cs) return;
+    
+    document.getElementById('csId').value = cs.case_studies_id;
+    document.getElementById('cs_title').value = cs.case_studies_title;
+    document.getElementById('cs_slug').value = cs.slug;
+    document.getElementById('company_name').value = cs.company_name;
+    document.getElementById('overview').value = cs.overview;
+    document.getElementById('challenges').value = cs.challenges;
+    document.getElementById('solutions').value = cs.solutions;
+    document.getElementById('results').value = cs.results;
+    document.getElementById('cs_meta_desc').value = cs.meta_desc;
+    
+    // Set metrics
+    if (cs.key_metrics && Array.isArray(cs.key_metrics)) {
+        if (cs.key_metrics[0]) { document.getElementById('m1v').value = cs.key_metrics[0].value; document.getElementById('m1l').value = cs.key_metrics[0].label; }
+        if (cs.key_metrics[1]) { document.getElementById('m2v').value = cs.key_metrics[1].value; document.getElementById('m2l').value = cs.key_metrics[1].label; }
+        if (cs.key_metrics[2]) { document.getElementById('m3v').value = cs.key_metrics[2].value; document.getElementById('m3l').value = cs.key_metrics[2].label; }
+    }
+    
+    // Set industry select
+    const indOption = Array.from(document.getElementById('cs_industry').options).find(o => o.text === cs.industry);
+    if (indOption) document.getElementById('cs_industry').value = indOption.value;
+    
+    document.getElementById('cs_status').value = cs.case_study_status;
+    document.getElementById('csModalTitle').innerHTML = '&#128202; Edit Case Study';
+    
+    if (cs.cover_image) {
+        document.getElementById('csUploadLabel').textContent = 'Image attached (click to change)';
+    }
+
+    openModal('csModal');
+}
+
+document.getElementById('csForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('csId').value;
+    const formData = new FormData(e.target);
+    
+    // Build metrics JSON
+    const metrics = [];
+    if (document.getElementById('m1v').value) metrics.push({ value: document.getElementById('m1v').value, label: document.getElementById('m1l').value });
+    if (document.getElementById('m2v').value) metrics.push({ value: document.getElementById('m2v').value, label: document.getElementById('m2l').value });
+    if (document.getElementById('m3v').value) metrics.push({ value: document.getElementById('m3v').value, label: document.getElementById('m3l').value });
+    formData.append('key_metrics', JSON.stringify(metrics));
+    
+    let url = '/case_studies/create_case_study/';
+    if (id) {
+        url = `/case_studies/update_case_study/${id}/`;
+        formData.append('_method', 'PUT');
+    }
+    
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: formData
+    });
+    
+    const data = await res.json();
+    if (data.status === 'success') {
+        closeModal('csModal');
+        fetchCaseStudies();
+    } else {
+        alert(data.msg);
+    }
+});
+
+async function deleteCS(id) {
+    if (!confirm('Are you sure you want to delete this case study?')) return;
+    const res = await fetch(`/case_studies/delete_case_study/${id}/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        fetchCaseStudies();
+    }
+}
+
+function previewCSImage(input) {
+    if (input.files && input.files[0]) {
+        document.getElementById('csUploadLabel').textContent = input.files[0].name;
+    }
+}
+
+// Filters
+document.getElementById('csSearch').addEventListener('input', applyCSFilters);
+document.getElementById('industryFilter').addEventListener('change', applyCSFilters);
+document.getElementById('statusFilter').addEventListener('change', applyCSFilters);
+
+function applyCSFilters() {
+    const q = document.getElementById('csSearch').value.toLowerCase();
+    const i = document.getElementById('industryFilter').value;
+    const s = document.getElementById('statusFilter').value;
+    
+    const filtered = caseStudies.filter(b => {
+        const matchesSearch = b.case_studies_title.toLowerCase().includes(q);
+        const matchesIndustry = !i || b.industry === i;
+        const matchesStatus = !s || b.case_study_status === s;
+        return matchesSearch && matchesIndustry && matchesStatus;
+    });
+    renderCS(filtered);
+}
+</script>
+{% endblock %}
